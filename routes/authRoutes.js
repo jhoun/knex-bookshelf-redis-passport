@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const Users = require('../db/models/Users.js');
-const passport = require('passport');
 
 router.post('/register', (req, res) => {
   const { email, password } = req.body;
@@ -16,35 +15,24 @@ router.post('/register', (req, res) => {
     });
 });
 
-router.post(
-  '/login',
-  passport.authenticate('local', {
-    successRedirect: '/auth/protected',
-    failureRedirect: '/'
-  }),
-  function(req, res) {
-    console.log('req', req);
-    res.send('authenticated');
-    /* No passport.js */
-
-    //   const { email, password } = req.body;
-    //   console.log('email', email);
-    //   Users.where({ email })
-    //     .fetch()
-    //     .then(user => {
-    //       if (user !== null && password === user.attributes.password) {
-    //         req.session.isLoggedIn = true;
-    //         res.send('Authorized');
-    //       } else {
-    //         res.send('Unauthorized');
-    //       }
-    //     })
-    //     .catch(err => {
-    //       console.log('err', err);
-    //       res.send(err);
-    //     });
-  }
-);
+router.post('/login', function(req, res) {
+  console.log('req', req);
+  const { email, password } = req.body;
+  Users.where({ email })
+    .fetch()
+    .then(user => {
+      if (user !== null && password === user.attributes.password) {
+        req.session.isLoggedIn = true;
+        res.send('Authorized');
+      } else {
+        res.send('Unauthorized');
+      }
+    })
+    .catch(err => {
+      console.log('err', err);
+      res.send(err);
+    });
+});
 
 router.post('/logout', (req, res) => {
   req.session.destroy();

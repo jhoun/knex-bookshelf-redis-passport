@@ -17,11 +17,9 @@ router.get('/', (req, res) => {
 
 router.get('/:user_id/tasks', (req, res) => {
   const { user_id } = req.params;
-  console.log('Tasks.fetchAll()', Tasks.where({ user_id }).fetchAll());
   Tasks.where({ user_id })
     .fetchAll()
     .then(result => {
-      console.log('result', result);
       res.send(result);
     })
     .catch(err => {
@@ -40,7 +38,6 @@ router.post('/', (req, res) => {
   Tasks.forge(payload)
     .save()
     .then(result => {
-      console.log('result', result);
       res.send('success');
     })
     .catch(err => {
@@ -52,11 +49,9 @@ router.post('/', (req, res) => {
 router.put('/:task_id', (req, res) => {
   const { title, description, is_complete } = req.body;
   const { task_id } = req.params;
-  console.log('task_id', task_id);
   Tasks.where({ task_id })
     .fetch()
     .then(task => {
-      console.log('task', task);
       return task.save({ title, description, is_complete });
     })
     .then(result => {
