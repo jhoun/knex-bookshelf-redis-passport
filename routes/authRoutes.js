@@ -2,18 +2,22 @@ const express = require('express');
 const router = express.Router();
 const Users = require('../db/models/Users.js');
 const passport = require('passport');
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
 
 router.post('/register', (req, res) => {
   const { email, password } = req.body;
-  Users.forge({ email, password })
-    .save()
-    .then(result => {
-      if (result) {
-        res.redirect('/auth/protected');
-      } else {
-        res.send('fail');
-      }
-    });
+  bcrypt.hash(password, saltRounds).then(hashedPassword => {
+    Users.forge({ email, password: hashedPassword })
+      .save()
+      .then(result => {
+        if (result) {
+          res.redirect('/auth/protected');
+        } else {
+          res.send('fail');
+        }
+      });
+  });
 });
 
 router.post(
@@ -25,24 +29,6 @@ router.post(
   function(req, res) {
     console.log('req', req);
     res.send('authenticated');
-    /* No passport.js */
-
-    //   const { email, password } = req.body;
-    //   console.log('email', email);
-    //   Users.where({ email })
-    //     .fetch()
-    //     .then(user => {
-    //       if (user !== null && password === user.attributes.password) {
-    //         req.session.isLoggedIn = true;
-    //         res.send('Authorized');
-    //       } else {
-    //         res.send('Unauthorized');
-    //       }
-    //     })
-    //     .catch(err => {
-    //       console.log('err', err);
-    //       res.send(err);
-    //     });
   }
 );
 

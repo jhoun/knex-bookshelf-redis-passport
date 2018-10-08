@@ -7,6 +7,7 @@ const redisStore = require('connect-redis')(session);
 const CONFIG = require('./config.json');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
+const Users = require('./db/models/Users.js');
 const authRoutes = require('./routes/authRoutes.js');
 const mainRoutes = require('./routes/mainRoutes.js');
 const PORT = 3000;
@@ -41,9 +42,12 @@ app.use(passport.session());
 passport.use(
   new LocalStrategy(
     { usernameField: 'email', passwordField: 'password' },
-    (username, password, done) => {
-      console.log('username', username);
-      console.log('password', password);
+    (email, password, done) => {
+      Users.where({ email })
+        .fetch()
+        .then(user => {
+          console.log('user.attributes', user.attributes.password);
+        });
     }
   )
 );
