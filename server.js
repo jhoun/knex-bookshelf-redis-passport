@@ -68,21 +68,25 @@ passport.use(
   )
 );
 
-// Configure Passport authenticated session persistence.
-//
-// In order to restore authentication state across HTTP requests, Passport needs
-// to serialize users into and deserialize users out of the session.  The
-// typical implementation of this is as simple as supplying the user ID when
-// serializing, and querying the user record by ID from the database when
-// deserializing.
+// upon successful login, get user from database, save user data into
+// session, which is in Redis
 passport.serializeUser((user, done) => {
-  console.log('serializing user', user);
   done(null, user.id);
 });
 
+// upon successful authorized request, we will take some information from
+// the session, for exampled 'user.id', to retrieve user record from database
+// and put into req.user
 passport.deserializeUser((user, done) => {
-  console.log('deserialize user', user);
-  done(null, user);
+  return Users.where({ user_id: user })
+    .fetch()
+    .then(user => {
+      const userAttributes = {
+        user_id: user.attributes.user_id,
+        email: user.attributes.email
+      };
+      done(null, userAttributes);
+    });
 });
 
 app.use('/auth', authRoutes);

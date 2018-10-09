@@ -3,11 +3,11 @@ const router = express.Router();
 const Users = require('../db/models/Users.js');
 const passport = require('passport');
 const bcrypt = require('bcrypt');
-const saltRounds = 10;
+const CONFIG = require('../config.json');
 
 router.post('/register', (req, res) => {
   const { email, password } = req.body;
-  bcrypt.hash(password, saltRounds).then(hashedPassword => {
+  bcrypt.hash(password, CONFIG.SALT_ROUNDS).then(hashedPassword => {
     Users.forge({ email, password: hashedPassword })
       .save()
       .then(result => {
@@ -38,10 +38,10 @@ router.post('/logout', (req, res) => {
 });
 
 router.get('/protected', (req, res) => {
-  if (req.session.isLoggedIn) {
+  if (req.isAuthenticated()) {
     res.send('protected');
   } else {
-    res.send('Not Authorized');
+    res.send('NOT ALLOWED');
   }
 });
 
